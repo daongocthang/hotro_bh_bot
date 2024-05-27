@@ -1,0 +1,27 @@
+intents:
+- tag: tam_biet
+  patterns:
+  - tạm biệt
+  - hẹn gặp lại
+  - gặp lại sau
+  - lúc khác gặp lại
+  responses:
+  - hẹn gặp lại
+- tag: xin_chao
+  patterns:
+  - này
+  - xin chào
+  - chào
+  responses:
+  - xin chào
+- tag: tra_he_thong
+  patterns:
+  - trả phiếu con này giúp cái a
+  - trả hàng ht dùm e với a
+  - nhờ a trả bh giúp e nha
+  - nhờ a trả tb dùm
+  - nhờ a trả lại tb giúp e
+  - trả giúp em modem k hàng vật lý nha
+  - nhờ a xác nhận trả lại dùm e với
+  responses:
+  - đã nhận được yêu cầu
