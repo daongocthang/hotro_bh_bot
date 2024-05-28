@@ -24,4 +24,4 @@ intents:
   - trả giúp em modem k hàng vật lý nha
   - nhờ a xác nhận trả lại dùm e với
   responses:
-  - đã nhận được yêu cầu
+  - Để được hỗ trợ trả hệ thống bạn vui lòng nhắn /hotro_tra_ht <mã bảo hành>
