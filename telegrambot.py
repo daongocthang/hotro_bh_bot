@@ -1,16 +1,22 @@
 import os
-from typing import List
+import re
+from typing import Dict
+import random
 import logging
 
 import telegram
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters, PicklePersistence
+from telegram.ext import (Application,
+                          CommandHandler,
+                          MessageHandler,
+                          ContextTypes,
+                          filters,
+                          PicklePersistence
+                          )
 
 from torchbot import utils
 from torchbot.prediction import predict
-
-TOKEN = '7196696529:AAG78sEoFvYUdpxncpYuHyDVF8zfpLtqxz4'
-BOT_USERNAME = '@hotro_bh_bot'
+from torchbot.passport import credentials
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 intents = utils.load_yml(os.path.join(basedir, "intents.yml"))['intents']
@@ -43,18 +49,38 @@ async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('This is a custom command.')
 
 
+async def detail_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data: Dict[str, str] = {
+        'chat_id': update.message.chat_id,
+        'user': update.effective_user.mention_html()
+    }
+    await update.message.reply_text(data.__str__())
+
+
 async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    code = context.args[0]
-    if code.startswith("TNBH"):
-        parse_pickle(context)[update.message.chat_id] = context.args[0]
-        await update.message.reply_text(f'BHKV đã xử lý mã bảo hành {code} sau hh:mm')
-    else:
-        await update.message.reply_text(f'Mã bảo hành không hợp lệ. Bạn vui lòng nhập lại mã bảo hành.')
+    pattern = re.compile(r'TNBH[0-9]{7}')
+    try:
+        code = context.args[0]
+        if pattern.match(code.strip()):
+            parse_pickle(context)[context.args[0]] = {
+                'chat_id': update.message.chat_id,
+                'user': update.effective_user.mention_html()
+            }
+            ok_hand = '👌'
+            await update.message.reply_text(f'{ok_hand} BHKV sẽ trả mã {code} sau hh:mm')
+        else:
+            no_entry = '⛔'
+            await update.message.reply_text(f'Mã bảo hành không đúng {no_entry}')
+    except (IndexError, ValueError):
+        disappoint_face = '😞'
+        await update.message.reply_text(f'Không có mã bảo hành {disappoint_face}')
 
 
 async def show_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = parse_pickle(context)
-    await update.message.reply_text(data if data else "Không có dữ liệu.")
+    if update.message.chat_id != credentials['admin_id']:
+        return
+    data: dict = parse_pickle(context)
+    await update.message.reply_text('\n'.join(list(data.keys())) if data else "Không có dữ liệu.")
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,10 +94,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = text.strip().lower()
     prob, tag = predict(text)
     print("prob:", prob.item(), "tag:", tag)
-    if prob.item() > 0.95 and tag == "tra_he_thong":
-        await update.message.reply_text(
-            'Bạn vui lòng nhắn /hotro_tra_ht <MA BAO HANH>'
-        )
+    if prob.item() > 0.95:
+        for intent in intents:
+            if tag in intent['tag']:
+                await update.message.reply_text(
+                    random.choice(intent['responses'])
+                )
+                break
 
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -79,19 +108,21 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_send(text: str, chat_id: str):
-    bot = telegram.Bot(token=TOKEN)
+    bot = telegram.Bot(token=credentials['token'])
     async with bot:
         await bot.send_message(text=text, chat_id=chat_id)
 
 
 if __name__ == '__main__':
     persistence = PicklePersistence(os.path.join(basedir, "db"))
-    app = Application.builder().token(TOKEN).persistence(persistence).build()
+    app = Application.builder().token(credentials['token']).persistence(persistence).build()
 
     # commands
     app.add_handler(CommandHandler('start', start_command))
     app.add_handler(CommandHandler('help', help_command))
     app.add_handler(CommandHandler('show', show_command))
+    app.add_handler(CommandHandler('detail_info', detail_info))
+
     app.add_handler(CommandHandler('hotro_tra_ht', support_command))
 
     # messages
