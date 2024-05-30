@@ -1,7 +1,7 @@
 import yaml
 
 
-def load_yml(file):
+def yml(file):
     with open(file, 'r', encoding='utf-8') as f:
         try:
             return yaml.safe_load(f)
@@ -9,6 +9,6 @@ def load_yml(file):
             print(e)
 
 
-def load_txt(file):
+def txt(file):
     with open(file, 'r', encoding='utf-8') as f:
         return f.read().splitlines()

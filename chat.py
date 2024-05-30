@@ -1,10 +1,10 @@
 import os
 import random
 from torchbot.prediction import predict
-from torchbot.utils import load_yml
+from utils.load import yml
 
 __basedir = os.path.dirname(os.path.abspath(__file__))
-intents = load_yml(os.path.join(__basedir, 'intents.yml'))['intents']
+intents = yml(os.path.join(__basedir, 'intents.yml'))['intents']
 
 print("Let's chat! (type '/stop' to exit)")
 while True:

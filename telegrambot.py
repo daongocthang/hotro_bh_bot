@@ -14,12 +14,13 @@ from telegram.ext import (Application,
                           PicklePersistence
                           )
 
-from torchbot import utils
+from utils import load
 from torchbot.prediction import predict
 from torchbot.passport import credentials
+from utils.emoji import Emoji
 
 basedir = os.path.dirname(os.path.abspath(__file__))
-intents = utils.load_yml(os.path.join(basedir, "intents.yml"))['intents']
+intents = load.yml(os.path.join(basedir, "intents.yml"))['intents']
 
 # Enable logging
 logging.basicConfig(
@@ -66,21 +67,36 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'chat_id': update.message.chat_id,
                 'user': update.effective_user.mention_html()
             }
-            ok_hand = '👌'
-            await update.message.reply_text(f'{ok_hand} BHKV sẽ trả mã {code} sau hh:mm')
+
+            await update.message.reply_text(f'{Emoji.OK_HAND} BHKV sẽ trả mã {code} sau hh:mm')
         else:
-            no_entry = '⛔'
-            await update.message.reply_text(f'Mã bảo hành không đúng {no_entry}')
+            await update.message.reply_text(f'Mã bảo hành không đúng {Emoji.NO_ENTRY}')
     except (IndexError, ValueError):
-        disappoint_face = '😞'
-        await update.message.reply_text(f'Không có mã bảo hành {disappoint_face}')
+        await update.message.reply_text(f'Không có mã bảo hành {Emoji.DISAPPOINT_FACE}')
+
+
+# Only Admin
+def require_admin(update: Update):
+    if update.message.chat_id != credentials['admin_id']:
+        raise PermissionError("Only allow admins")
 
 
 async def show_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.chat_id != credentials['admin_id']:
-        return
-    data: dict = parse_pickle(context)
-    await update.message.reply_text('\n'.join(list(data.keys())) if data else "Không có dữ liệu.")
+    try:
+        require_admin(update)
+
+        data: dict = parse_pickle(context)
+        await update.message.reply_text(text='\n'.join(list(data.keys())) if data else "Không có dữ liệu.")
+    except PermissionError as e:
+        logger.error(e)
+
+
+async def ok_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    param = context.args[0]
+    if param == 'true':
+        pass
+    if param == 'false':
+        pass
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -1,5 +1,5 @@
 import os
-from . import ROOT_DIR
+from utils import ROOT_DIR
 import torch
 from torchbot.model import NeuralNet
 from torchbot.nltk_vi import tokenize, bag_of_words

@@ -4,13 +4,13 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
-from torchbot.utils import load_txt, load_yml
+from utils import load
 from torchbot.model import NeuralNet
 from torchbot.nltk_vi import tokenize, bag_of_words
+from utils import ROOT_DIR
 
-CUR_DIR = os.path.dirname(os.path.abspath(__file__))
-intents = load_yml(os.path.join(CUR_DIR, 'intents.yml'))['intents']
-ignore_words = load_txt(os.path.join(CUR_DIR, "stopwords.txt"))
+intents = load.yml(os.path.join(ROOT_DIR, 'intents.yml'))['intents']
+ignore_words = load.txt(os.path.join(ROOT_DIR, "stopwords.txt"))
 
 all_words = []
 tags = []
@@ -128,5 +128,5 @@ data = {
 }
 
 FILE = 'data/data.pth'
-torch.save(data, os.path.join(CUR_DIR, FILE))
+torch.save(data, os.path.join(ROOT_DIR, FILE))
 print(f'[INFO] training data complete. File saved to "{FILE}"')

@@ -1,6 +1,6 @@
 import os
-from . import ROOT_DIR
+from utils import ROOT_DIR
 
-from torchbot.utils import load_yml
+from utils import load
 
-credentials = load_yml(os.path.join(ROOT_DIR, 'credentials.yml'))
+credentials = load.yml(os.path.join(ROOT_DIR, 'credentials.yml'))
