@@ -4,3 +4,6 @@ __pycache__/
 venv/
 
 .idea/
+
+credentials.yml
+firebase.json

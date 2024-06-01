@@ -1,12 +1,16 @@
 intents:
-- tag: tam_biet
+- tag: cam_on
   patterns:
-  - tạm biệt
-  - hẹn gặp lại
-  - gặp lại sau
-  - lúc khác gặp lại
+  - cảm ơn
+  - tks
+  - thanks
+  - thank
+  - tks anh
+  - e cảm ơn a
+  - thank a
+  - em cảm ơn anh
   responses:
-  - hẹn gặp lại
+  - ~ 👍
 - tag: xin_chao
   patterns:
   - này
@@ -23,5 +27,12 @@ intents:
   - nhờ a trả lại tb giúp e
   - trả giúp em modem k hàng vật lý nha
   - nhờ a xác nhận trả lại dùm e với
+  - trả thiết bị giúp em, modem không hỏng
+  - tb ko hỏng, nhờ anh trả giúp e với
+  - hàng không hỏng trả giúp e nha a
+  - trả giúp e, tb không hỏng a
+  - nhờ a trả lại giúp em, tb ko hỏng
+  - trả em con này luôn
+  - trả giúp em mã này nha
   responses:
   - Bạn vui lòng nhắn /hotro_tra_ht <MA BAO HANH>
