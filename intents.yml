@@ -1,14 +1,11 @@
 intents:
 - tag: cam_on
   patterns:
-  - cảm ơn
-  - tks
-  - thanks
-  - thank
-  - tks anh
   - e cảm ơn a
-  - thank a
   - em cảm ơn anh
+  - cảm ơn anh
+  - dạ anh
+  - ok anh
   responses:
   - ~ 👍
 - tag: xin_chao
@@ -35,4 +32,4 @@ intents:
   - trả em con này luôn
   - trả giúp em mã này nha
   responses:
-  - Bạn vui lòng nhắn /hotro_tra_ht <MA BAO HANH>
+  - Bạn hãy nhắn /hotro_tra_ht <MA BAO HANH> để được hỗ trợ nhé!

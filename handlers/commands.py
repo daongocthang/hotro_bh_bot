@@ -49,7 +49,7 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 mention=update.effective_user.mention_html(),
                 message_id=update.message.id
             )
-            await update.message.reply_text(f'{Emoji.OK_HAND} Bạn chờ BHKV tiếp nhận nhé!')
+            await update.message.reply_text(f'{Emoji.OK_HAND} Bạn chờ BHKV xử lý nhé!')
         else:
             await update.message.reply_text(f'Mã bảo hành không đúng {Emoji.NO_ENTRY}')
     except (IndexError, ValueError):

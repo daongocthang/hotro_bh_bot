@@ -27,7 +27,7 @@ def handle_response(text: str):
     text = text.strip().lower()
     prob, tag = predict(text)
     print("prob:", prob.item(), "tag:", tag)
-    if prob.item() > 0.90:
+    if prob.item() > 0.95:
         for intent in intents:
             if tag in intent['tag']:
                 return random.choice(intent['responses']), intent.get('state')
@@ -53,22 +53,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             matcher = re.search('<a href="tg://user\?id=' + admin_tag + '">.+?</a>', text_html)
             new_text = text_html.replace(matcher.group(), '').__str__()
 
-        from_username = update.message.reply_to_message.from_user.username
-        if from_username:
+        if hasattr(update.message.reply_to_message, 'from_user'):
+            from_username = update.message.reply_to_message.from_user.username
             if bot_tag in from_username:
                 new_text = text
 
         if new_text:
-            response, state = handle_response(new_text)
+            response, action = handle_response(new_text)
         else:
             return ConversationHandler.END
 
     else:
-        response, state = handle_response(update.message.text)
+        response, action = handle_response(update.message.text)
 
     await update.message.reply_text(response)
 
-    return state if state else ConversationHandler.END
+    return action if action else ConversationHandler.END
 
 
 def end(update: Update, context: ContextTypes.DEFAULT_TYPE):
