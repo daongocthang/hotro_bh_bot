@@ -1,7 +1,9 @@
+import logging
 import re
+from collections import defaultdict
 from typing import NamedTuple
 
-from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup, Sticker
+from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import (
     ContextTypes,
@@ -14,6 +16,8 @@ from utils.emoji import Emoji
 
 result_ok: bool
 
+logger = logging.getLogger(__name__)
+
 
 class DataInput(NamedTuple):
     chat_id: int
@@ -21,8 +25,23 @@ class DataInput(NamedTuple):
     message_id: int
 
 
-def parse_pickle(context: ContextTypes.DEFAULT_TYPE):
-    return context.user_data
+def find_user_id(s):
+    patt = r'id=(.*)"'
+    found = re.search(patt, s)
+    if found:
+        return found.group(1)
+
+
+def parser_data(context: ContextTypes.DEFAULT_TYPE):
+    output = {}
+    for data in context.application.user_data.values():
+        for k, v in data.items():
+            output[k] = DataInput(*v)
+    return defaultdict(dict, output)
+
+
+def remove_data(user_id: int, key: str, context: ContextTypes.DEFAULT_TYPE):
+    context.application.user_data.get(user_id).pop(key)
 
 
 def parse_bool(b: bool) -> int:
@@ -33,33 +52,39 @@ async def default(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Welcom to Telegram Bot')
 
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Xin chào! Tôi là bot hỗ trợ bảo hành.')
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message_type = update.message.chat.type
+    if message_type == 'private':
+        mention_name = update.message.chat.mention_html()
+        text = f'Tôi có thể hộ trợ trả hệ thống bảo hành. '
+        text += f'Để được hỗ trợ nhiều hơn, {mention_name} vui lòng tham gia nhóm <a href="https://t.me/+AlE4kevmxlM5OWRl">Hỗ trợ Bảo hành</a>'
+        await update.message.reply_html(text)
 
 
 async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pattern = re.compile(r'^TNBH[0-9]{7}$')
     try:
-        code = context.args[0]
-        code = code.strip()
-        if pattern.match(code):
-            print(code)
-            parse_pickle(context)[code.strip()] = DataInput(
-                chat_id=update.message.chat_id,
-                mention=update.effective_user.mention_html(),
-                message_id=update.message.id
-            )
+        user_data = context.user_data
+        pattern = re.compile(r'^TNBH[0-9]{7}$')
+        ticket = context.args[0]
+        ticket = ticket.strip()
+        if pattern.match(ticket):
+            if ticket not in user_data:
+                user_data[ticket] = DataInput(
+                    chat_id=update.message.chat_id,
+                    mention=update.effective_user.mention_html(),
+                    message_id=update.message.id
+                )
             await update.message.reply_text(f'{Emoji.OK_HAND} Bạn chờ BHKV xử lý nhé!')
         else:
             await update.message.reply_text(f'Mã bảo hành không đúng {Emoji.NO_ENTRY}')
+
     except (IndexError, ValueError):
         await update.message.reply_text(f'Không có mã bảo hành {Emoji.DISAPPOINT_FACE}')
 
 
 @admin_only
 async def show_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data: dict = parse_pickle(context)
-    print(data)
+    data: dict = parser_data(context)
     await update.message.reply_text(text='\n'.join(list(data.keys())) if data else "Không có dữ liệu.")
     # await update.message.reply_text(data.__str__() if data else "Không có dữ liệu.")
 
@@ -94,15 +119,17 @@ async def later_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tickets = update.message.text.split('\n')
-    data = parse_pickle(context)
+    data = parser_data(context)
     reply_text = [
         '%s chưa tiếp nhận hoặc đang chờ CM. %s hỏi lại CH nha!',
         '%s đã trả CM. %s lh CH để xác nhận nhé!'
     ]
 
     for key in tickets:
-        if key in data:
+        if key in data.keys():
             user: DataInput = data.pop(key)
+            chat_id = find_user_id(user.mention)
+            remove_data(int(chat_id), key, context)
             mention_html = user.mention
             await context.bot.send_message(
                 chat_id=user.chat_id,

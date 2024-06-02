@@ -7,7 +7,7 @@ intents:
   - dạ anh
   - ok anh
   responses:
-  - ~ 👍
+  - 👍
 - tag: xin_chao
   patterns:
   - này

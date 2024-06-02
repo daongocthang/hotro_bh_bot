@@ -14,13 +14,13 @@ from telegram.ext import (
 
 from torchbot.passport import credentials
 from torchbot.prediction import predict
-from utils import load, ROOT_DIR
+from utils import loader, ROOT_DIR
 from handlers import commands as cmd, state
 from utils.emoji import Emoji
 
 NEXT, END = range(2)
 
-intents: dict = load.yml(os.path.join(ROOT_DIR, "intents.yml"))['intents']
+intents: dict = loader.load_yml(os.path.join(ROOT_DIR, "intents.yml"))['intents']
 
 
 def handle_response(text: str):
@@ -31,7 +31,7 @@ def handle_response(text: str):
         for intent in intents:
             if tag in intent['tag']:
                 return random.choice(intent['responses']), intent.get('state')
-    return 'Vẫn chưa hiểu ý bạn?!', None
+    return Emoji.ROBOT, None
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,8 +54,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             new_text = text_html.replace(matcher.group(), '').__str__()
 
         if hasattr(update.message.reply_to_message, 'from_user'):
-            from_username = update.message.reply_to_message.from_user.username
-            if bot_tag in from_username:
+            from_user: dict = update.message.reply_to_message.from_user.to_dict()
+            if from_user.get('username') == bot_tag:
                 new_text = text
 
         if new_text:

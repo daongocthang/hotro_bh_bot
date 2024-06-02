@@ -1,12 +1,11 @@
-from abc import ABC
 from ast import literal_eval
 from collections import defaultdict
+from copy import deepcopy
 from typing import Dict, Any
 
 import firebase_admin
 from firebase_admin import db
 from firebase_admin.db import Reference
-
 from telegram.ext import BasePersistence, PersistenceInput
 
 
@@ -39,29 +38,31 @@ class FirebasePersistence(BasePersistence):
     @staticmethod
     def get(ref: Reference) -> Dict[int, Any]:
         output = FirebasePersistence.convert_key(ref.get() or {})
-        return defaultdict(dict, output)
+        return output
 
     async def get_user_data(self):
-        return defaultdict(dict, self.get(self.fb_user_data))
+        user_data = deepcopy(self.get(self.fb_user_data))
+        return user_data
 
     async def get_chat_data(self):
-        return defaultdict(dict, self.get(self.fb_chat_data))
+        chat_data = deepcopy(self.get(self.fb_chat_data))
+        return chat_data
 
     async def get_bot_data(self):
-        return defaultdict(dict, self.fb_bot_data.get() or {})
+        return deepcopy(self.fb_bot_data.get() or {})
 
     async def get_conversations(self, name: str):
         res = self.fb_conversation.child(name).get() or {}
         return {literal_eval(k): v for k, v in res.items()}
 
     async def update_user_data(self, user_id: int, data: Dict):
-        if data:
+        if len(data) > 0:
             self.fb_user_data.child(str(user_id)).update(data)
         else:
             self.fb_user_data.child(str(user_id)).delete()
 
     async def update_chat_data(self, chat_id: int, data: Dict):
-        if data:
+        if len(data) > 0:
             self.fb_chat_data.child(str(chat_id)).update(data)
         else:
             self.fb_chat_data.child(str(chat_id)).delete()
@@ -82,10 +83,10 @@ class FirebasePersistence(BasePersistence):
         pass
 
     async def drop_chat_data(self, chat_id: int):
-        pass
+        self.fb_user_data.child(str(chat_id)).delete()
 
     async def drop_user_data(self, user_id: int):
-        pass
+        self.fb_user_data.child(str(user_id)).delete()
 
     async def refresh_bot_data(self, bot_data):
         pass

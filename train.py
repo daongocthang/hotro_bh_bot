@@ -4,13 +4,13 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
-from utils import load
+from utils import loader
 from torchbot.model import NeuralNet
 from torchbot.nltk_vi import tokenize, bag_of_words
 from utils import ROOT_DIR
 
-intents = load.yml(os.path.join(ROOT_DIR, 'intents.yml'))['intents']
-ignore_words = load.txt(os.path.join(ROOT_DIR, "stopwords.txt"))
+intents = loader.load_yml(os.path.join(ROOT_DIR, 'intents.yml'))['intents']
+ignore_words = loader.load_txt(os.path.join(ROOT_DIR, "stopwords.txt"))
 
 all_words = []
 tags = []
