@@ -125,7 +125,7 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tickets = update.message.text.split('\n')
     data = parser_data(context)
     reply_text = [
-        '%s chưa tiếp nhận hoặc đang chờ CM. %s hỏi lại CH nha!',
+        '%s chưa có trên Hệ thống BH. %s bảo CH tiếp nhận trước nha!',
         '%s đã trả CM. %s lh CH để xác nhận nhé!'
     ]
 
@@ -152,6 +152,7 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @admin_only
 async def remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Vui lòng nhập danh sách mã bảo hành')
+    return state.NEXT
 
 
 async def do_remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
