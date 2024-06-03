@@ -12,3 +12,5 @@ class Emoji:
     PARTY_POPPER = '🎉'
     CONFETTI_BALL = '🎊'
     PARTYING_FACE = '🥳'
+    CHECK_MARK = '✔'
+    CROSS_MARK = '❌'

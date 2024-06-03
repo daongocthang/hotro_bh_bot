@@ -4,7 +4,7 @@ from telegram.ext import (Application,
                           ChatMemberHandler, PicklePersistence)
 
 from handlers import commands as cmd, chat_member
-from handlers.conversations import main_ch, send_result_ch
+from handlers.conversations import main_ch, send_result_ch, remove_ch
 from persist.fb import FirebasePersistence
 from torchbot.passport import credentials, fb_config
 from utils.loader import get_logger
@@ -31,10 +31,11 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler(['start', 'help'], cmd.help_command))
     app.add_handler(CommandHandler('hotro_tra_ht', cmd.support_command))
     app.add_handler(CommandHandler('show', cmd.show_command))
+    app.add_handler(remove_ch)
     app.add_handler(send_result_ch)
 
     # conversations
     app.add_handler(main_ch)
 
     # Run the bot until the user presses Ctrl-C
-    app.run_polling(allowed_updates=Update.ALL_TYPES,poll_interval=1)
+    app.run_polling(allowed_updates=Update.ALL_TYPES, poll_interval=1)

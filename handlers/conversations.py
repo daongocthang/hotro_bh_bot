@@ -110,3 +110,9 @@ send_result_ch = ConversationHandler(
     },
     fallbacks=[MessageHandler(filters.Regex('(done|cancel)$'), end)]
 )
+
+remove_ch = ConversationHandler(
+    entry_points=[CommandHandler('remove', cmd.remove_command)],
+    states={state.NEXT: [MessageHandler(filters.TEXT, cmd.do_remove_command)]},
+    fallbacks=[MessageHandler(filters.Regex('(done|cancel)$'), end)]
+)

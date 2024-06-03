@@ -59,6 +59,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = f'Tôi có thể hộ trợ trả hệ thống bảo hành. '
         text += f'Để được hỗ trợ nhiều hơn, {mention_name} vui lòng tham gia nhóm <a href="https://t.me/+AlE4kevmxlM5OWRl">Hỗ trợ Bảo hành</a>'
         await update.message.reply_html(text)
+    elif message_type == 'group':
+        text = '/hotro_tra_ht <MA BAO HANH> - hỗ trợ trả hệ thống không chuyển thiết bị vật lý'
+        await update.message.reply_text(text)
 
 
 async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -107,6 +110,7 @@ async def later_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text
     text = text.lower()
+
     if 'cancel' in text:
         await update.message.reply_text('Không còn gì để làm... ' + Emoji.SLEEPING_FACE)
         return ConversationHandler.END
@@ -128,8 +132,8 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for key in tickets:
         if key in data.keys():
             user: DataInput = data.pop(key)
-            chat_id = find_user_id(user.mention)
-            remove_data(int(chat_id), key, context)
+            user_id = find_user_id(user.mention)
+            remove_data(int(user_id), key, context)
             mention_html = user.mention
             await context.bot.send_message(
                 chat_id=user.chat_id,
@@ -138,10 +142,27 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode=ParseMode.HTML
             )
 
-            await update.message.reply_html(f'{key} đã gửi đến {mention_html}')
+            await update.message.reply_html(f'{Emoji.CHECK_MARK} {key} đã gửi đến {mention_html}')
         else:
-            await update.message.reply_text(f'{key} không có trong danh sách chờ xử lý')
+            await update.message.reply_text(f'{Emoji.CROSS_MARK} {key} không có trong danh sách chờ xử lý')
 
+    return ConversationHandler.END
+
+
+@admin_only
+async def remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text('Vui lòng nhập danh sách mã bảo hành')
+
+
+async def do_remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    tickets = update.message.text.split('\n')
+    data = parser_data(context)
+    for key in tickets:
+        if key in data.keys():
+            user: DataInput = data.pop(key)
+            user_id = find_user_id(user.mention)
+            remove_data(int(user_id), key, context)
+    await update.message.reply_text('Mã bảo hành đã xóa thành công.')
     return ConversationHandler.END
 
 
