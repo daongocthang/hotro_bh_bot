@@ -45,7 +45,7 @@ async def remove_data(user_id: int, key: str, context: ContextTypes.DEFAULT_TYPE
     if user_id not in context.application.user_data.keys():
         await context.application.persistence.drop_user_data(user_id)
     else:
-        data_changed: dict = context.application.user_data
+        data_changed: dict = context.application.user_data.get(user_id)
         await context.application.persistence.update_user_data(user_id, data_changed)
 
 
