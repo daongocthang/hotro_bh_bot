@@ -56,13 +56,13 @@ class FirebasePersistence(BasePersistence):
         return {literal_eval(k): v for k, v in res.items()}
 
     async def update_user_data(self, user_id: int, data: dict):
-        if data:
+        if len(data) > 0:
             self.fb_user_data.child(str(user_id)).update(data)
         else:
             self.fb_user_data.child(str(user_id)).delete()
 
     async def update_chat_data(self, chat_id: int, data: dict):
-        if data:
+        if len(data) > 0:
             self.fb_chat_data.child(str(chat_id)).update(data)
         else:
             self.fb_chat_data.child(str(chat_id)).delete()
