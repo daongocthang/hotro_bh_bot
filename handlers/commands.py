@@ -42,6 +42,11 @@ def parser_data(context: ContextTypes.DEFAULT_TYPE):
 
 def remove_data(user_id: int, key: str, context: ContextTypes.DEFAULT_TYPE):
     context.application.user_data.get(user_id).pop(key)
+    if user_id not in context.application.user_data.keys():
+        context.application.persistence.drop_user_data(user_id)
+    else:
+        data_changed: dict = context.application.user_data
+        context.application.persistence.update_user_data(user_id, data_changed)
 
 
 def parse_bool(b: bool) -> int:
@@ -142,9 +147,9 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode=ParseMode.HTML
             )
 
-            await update.message.reply_html(f'{Emoji.CHECK_MARK} {key} đã gửi đến {mention_html}')
+            await update.message.reply_html(f'{key} đã gửi đến {mention_html}')
         else:
-            await update.message.reply_text(f'{Emoji.CROSS_MARK} {key} không có trong danh sách chờ xử lý')
+            await update.message.reply_text(f'{key} không có trong danh sách chờ xử lý')
 
     return ConversationHandler.END
 
