@@ -40,13 +40,13 @@ def parser_data(context: ContextTypes.DEFAULT_TYPE):
     return defaultdict(dict, output)
 
 
-def remove_data(user_id: int, key: str, context: ContextTypes.DEFAULT_TYPE):
+async def remove_data(user_id: int, key: str, context: ContextTypes.DEFAULT_TYPE):
     context.application.user_data.get(user_id).pop(key)
     if user_id not in context.application.user_data.keys():
-        context.application.persistence.drop_user_data(user_id)
+        await context.application.persistence.drop_user_data(user_id)
     else:
         data_changed: dict = context.application.user_data
-        context.application.persistence.update_user_data(user_id, data_changed)
+        await context.application.persistence.update_user_data(user_id, data_changed)
 
 
 def parse_bool(b: bool) -> int:
@@ -138,7 +138,7 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if key in data.keys():
             user: DataInput = data.pop(key)
             user_id = find_user_id(user.mention)
-            remove_data(int(user_id), key, context)
+            await remove_data(int(user_id), key, context)
             mention_html = user.mention
             await context.bot.send_message(
                 chat_id=user.chat_id,
@@ -167,7 +167,7 @@ async def do_remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if key in data.keys():
             user: DataInput = data.pop(key)
             user_id = find_user_id(user.mention)
-            remove_data(int(user_id), key, context)
+            await remove_data(int(user_id), key, context)
     await update.message.reply_text('Mã bảo hành đã xóa thành công.')
     return ConversationHandler.END
 
