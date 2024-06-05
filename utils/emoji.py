@@ -14,3 +14,4 @@ class Emoji:
     PARTYING_FACE = '🥳'
     CHECK_MARK = '✔'
     CROSS_MARK = '❌'
+    CHECKBOX_WITH_CHECK='☑️'

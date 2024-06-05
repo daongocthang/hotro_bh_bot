@@ -73,8 +73,8 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user_data = context.user_data
         pattern = re.compile(r'^TNBH[0-9]{7}$')
-        ticket = context.args[0]
-        ticket = ticket.strip()
+        ticket = context.message.text.split(' ')
+        ticket = ticket[1].strip()
         if pattern.match(ticket):
             if ticket not in user_data:
                 user_data[ticket] = DataInput(
@@ -131,7 +131,7 @@ async def post_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = parser_data(context)
     reply_text = [
         '%s chưa có trên Hệ thống BH. %s bảo CH tiếp nhận trước nha!',
-        '%s đã trả CM. %s lh CH để xác nhận nhé!'
+        '%s đã trả CM. %s lh CH để xác nhận '+Emoji.CHECKBOX_WITH_CHECK
     ]
 
     for key in tickets:
